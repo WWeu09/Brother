@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fotogalerij</title>
+  <style>
+    /* Basis stijlen */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      color: #444;
+    }
+
+    /* Navigatie tabs */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .tab-button {
+      background-color: #f0f0f0;
+      border: none;
+      padding: 15px 30px;
+      margin: 0 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .tab-button:hover {
+      background-color: #e0e0e0;
+    }
+
+    .tab-button.active {
+      background-color: #4a90e2;
+      color: white;
+    }
+
+    /* Slider stijlen */
+    .slider-section {
+      margin-bottom: 50px;
+    }
+
+    .slider-container {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .slider {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      background-color: #eee;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slide.active {
+      opacity: 1;
+    }
+
+    .slide img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .slide-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0,0,0,0.7);
+      color: white;
+      padding: 15px;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+
+    .slider-nav {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .nav-button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      margin: 0 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-button:hover {
+      background-color: #3a80d2;
+    }
+
+    .nav-button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .nav-button svg {
+      width: 24px;
+      height: 24px;
+      margin: 0 5px;
+    }
+
+    .slide-counter {
+      font-size: 1.2rem;
+      margin: 0 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Grid stijlen */
+    .grid-section {
+      display: none;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    .gallery-item {
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-5px);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .gallery-caption {
+      padding: 15px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    /* Loading en error stijlen */
+    .loading {
+      text-align: center;
+      font-size: 1.5rem;
+      margin: 50px 0;
+    }
+
+    .error {
+      text-align: center;
+      color: #e74c3c;
+      font-size: 1.5rem;
+      margin: 50px 0;
+      padding: 20px;
+      background-color: #fdeaea;
+      border-radius: 10px;
+    }
+
+    /* Responsive stijlen */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .tab-button {
+        padding: 12px 20px;
+        font-size: 1rem;
+      }
+
+      .slider {
+        height: 350px;
+      }
+
+      .nav-button {
+        padding: 12px 20px;
+        font-size: 1rem;
+      }
+
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .tabs {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .tab-button {
+        margin: 5px 0;
+        width: 80%;
+      }
+
+      .slider {
+        height: 250px;
+      }
+
+      .slide-caption {
+        font-size: 1rem;
+        padding: 10px;
+      }
+
+      .nav-button {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+      }
+
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Fotogalerij</h1>
+
+    <!-- Navigatie tabs -->
+    <div class="tabs">
+      <button id="slider-tab" class="tab-button active">Foto Slider</button>
+      <button id="grid-tab" class="tab-button">Alle Foto's</button>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading" class="loading">Afbeeldingen worden geladen...</div>
+
+    <!-- Error message -->
+    <div id="error" class="error" style="display: none;"></div>
+
+    <!-- Slider sectie -->
+    <div id="slider-section" class="slider-section">
+      <div class="slider-container">
+        <div id="slider" class="slider">
+          <!-- Slides worden hier dynamisch toegevoegd -->
+        </div>
+      </div>
+      <div class="slider-nav">
+        <button id="prev-button" class="nav-button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Vorige
+        </button>
+        <div id="slide-counter" class="slide-counter">Foto 1 van 10</div>
+        <button id="next-button" class="nav-button">
+          Volgende
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid sectie -->
+    <div id="grid-section" class="grid-section">
+      <div id="gallery-grid" class="gallery-grid">
+        <!-- Grid items worden hier dynamisch toegevoegd -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM elementen
+      const sliderTab = document.getElementById('slider-tab');
+      const gridTab = document.getElementById('grid-tab');
+      const sliderSection = document.getElementById('slider-section');
+      const gridSection = document.getElementById('grid-section');
+      const slider = document.getElementById('slider');
+      const galleryGrid = document.getElementById('gallery-grid');
+      const prevButton = document.getElementById('prev-button');
+      const nextButton = document.getElementById('next-button');
+      const slideCounter = document.getElementById('slide-counter');
+      const loadingEl = document.getElementById('loading');
+      const errorEl = document.getElementById('error');
+
+      // Variabelen voor de slider
+      let currentSlideIndex = 0;
+      let slides = [];
+
+      // Tab navigatie
+      sliderTab.addEventListener('click', function() {
+        sliderTab.classList.add('active');
+        gridTab.classList.remove('active');
+        sliderSection.style.display = 'block';
+        gridSection.style.display = 'none';
+      });
+
+      gridTab.addEventListener('click', function() {
+        gridTab.classList.add('active');
+        sliderTab.classList.remove('active');
+        gridSection.style.display = 'block';
+        sliderSection.style.display = 'none';
+      });
+
+      // Slider navigatie
+      prevButton.addEventListener('click', function() {
+        changeSlide(-1);
+      });
+
+      nextButton.addEventListener('click', function() {
+        changeSlide(1);
+      });
+
+      // Functie om van slide te wisselen
+      function changeSlide(direction) {
+        slides[currentSlideIndex].classList.remove('active');
+        currentSlideIndex = (currentSlideIndex + direction + slides.length) % slides.length;
+        slides[currentSlideIndex].classList.add('active');
+        updateSlideCounter();
+      }
+
+      // Functie om de slide teller bij te werken
+      function updateSlideCounter() {
+        slideCounter.textContent = `Foto ${currentSlideIndex + 1} van ${slides.length}`;
+      }
+
+      // Google Sheet URL (CSV formaat)
+      const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwOyNlba5LleAKsOzIBRHmWlSqJ7RGNJ3yVK3Ws4Ilm4Q3p5OElb9DQbhiscDbWP0kbKZjR7yQ9MdG/pub?output=csv";
+
+      // Alternatieve URL als de bovenstaande niet werkt
+      const altSheetUrl = "https://docs.google.com/spreadsheets/d/1Rl-_eLhZK-vvQmJ4WwJA5QRgOG2LL2AUU9c2yIRvLHM/gviz/tq?tqx=out:csv";
+
+      // Functie om CSV te parsen
+      function parseCSV(csv) {
+        const lines = csv.split('\n');
+        return lines.map(line => {
+          // Verwerk waarden met aanhalingstekens en komma's erin
+          const result = [];
+          let startIndex = 0;
+          let inQuotes = false;
+          
+          for (let i = 0; i < line.length; i++) {
+            if (line[i] === '"') {
+              inQuotes = !inQuotes;
+            } else if (line[i] === ',' && !inQuotes) {
+              result.push(line.substring(startIndex, i).replace(/^"|"$/g, ''));
+              startIndex = i + 1;
+            }
+          }
+          
+          // Voeg de laatste waarde toe
+          result.push(line.substring(startIndex).replace(/^"|"$/g, ''));
+          
+          return result;
+        }).filter(row => row.length > 0 && row.some(cell => cell.trim() !== '')); // Filter lege rijen
+      }
+
+      // Functie om de gegevens op te halen en de galerij te vullen
+      function fetchData(url) {
+        fetch(url)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Kon de gegevens niet laden. Controleer de URL van het spreadsheet.');
+            }
+            return response.text();
+          })
+          .then(csvText => {
+            // Parse de CSV-gegevens
+            const rows = parseCSV(csvText);
+            
+            if (rows.length === 0) {
+              throw new Error('Geen gegevens gevonden in het spreadsheet.');
+            }
+            
+            // Verwijder de laadmelding
+            loadingEl.style.display = 'none';
+            
+            // Bepaal of de eerste rij een header is
+            const startRow = (rows[0][0].toLowerCase().includes('url') || rows[0][1].toLowerCase().includes('foto')) ? 1 : 0;
+            
+            // Loop door de rijen en maak de slides en grid items
+            for (let i = startRow; i < rows.length; i++) {
+              const row = rows[i];
+              
+              if (row.length >= 2 && row[0] && row[1]) {
+                const imageUrl = row[0].trim();
+                const title = row[1].trim();
+                
+                // Maak een slide voor de slider
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = title;
+                
+                const caption = document.createElement('div');
+                caption.className = 'slide-caption';
+                caption.textContent = title;
+                
+                slide.appendChild(img);
+                slide.appendChild(caption);
+                slider.appendChild(slide);
+                slides.push(slide);
+                
+                // Maak een item voor de grid
+                const gridItem = document.createElement('div');
+                gridItem.className = 'gallery-item';
+                
+                const gridImg = document.createElement('img');
+                gridImg.src = imageUrl;
+                gridImg.alt = title;
+                gridImg.loading = 'lazy'; // Lazy loading voor betere prestaties
+                
+                // Voeg foutafhandeling toe voor afbeeldingen
+                gridImg.onerror = function() {
+                  this.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22300%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23e0e0e0%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22100%22%20font-family%3D%22Arial%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23777%22%3EAfbeelding%20niet%20beschikbaar%3C%2Ftext%3E%3C%2Fsvg%3E';
+                  this.style.opacity = '0.7';
+                };
+                
+                const gridCaption = document.createElement('div');
+                gridCaption.className = 'gallery-caption';
+                gridCaption.textContent = title;
+                
+                gridItem.appendChild(gridImg);
+                gridItem.appendChild(gridCaption);
+                galleryGrid.appendChild(gridItem);
+              }
+            }
+            
+            // Activeer de eerste slide
+            if (slides.length > 0) {
+              slides[0].classList.add('active');
+              updateSlideCounter();
+            } else {
+              throw new Error('Geen afbeeldingen gevonden in het spreadsheet.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            
+            // Als de eerste URL mislukt, probeer de alternatieve URL
+            if (url === sheetUrl) {
+              console.log('Probeer alternatieve URL...');
+              fetchData(altSheetUrl);
+            } else {
+              // Toon foutmelding
+              loadingEl.style.display = 'none';
+              errorEl.style.display = 'block';
+              errorEl.textContent = error.message || 'Er is een fout opgetreden bij het laden van de afbeeldingen.';
+            }
+          });
+      }
+
+      // Start het ophalen van de gegevens
+      fetchData(sheetUrl);
+
+      // Toetsenbord navigatie voor de slider
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+          changeSlide(-1);
+        } else if (e.key === 'ArrowRight') {
+          changeSlide(1);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
