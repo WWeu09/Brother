@@ -88,6 +88,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      cursor: pointer; /* Toegevoegd: cursor pointer voor klikbare slides */
     }
 
     .slide.active {
@@ -172,6 +173,7 @@
       overflow: hidden;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       transition: transform 0.3s ease;
+      cursor: pointer; /* Toegevoegd: cursor pointer voor klikbare items */
     }
 
     .gallery-item:hover {
@@ -208,6 +210,128 @@
       border-radius: 10px;
     }
 
+    /* NIEUW: Lightbox stijlen */
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .lightbox.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lightbox-content {
+      position: relative;
+      max-width: 90%;
+      max-height: 80%;
+      margin: 0 auto;
+    }
+
+    .lightbox-image {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: 5px;
+    }
+
+    .lightbox-caption {
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 1.2rem;
+      margin-top: 10px;
+    }
+
+    .lightbox-controls {
+      position: absolute;
+      bottom: -60px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .lightbox-button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lightbox-button:hover {
+      background-color: #3a80d2;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: transparent;
+      color: white;
+      border: none;
+      font-size: 2rem;
+      cursor: pointer;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      transition: background-color 0.3s ease;
+    }
+
+    .lightbox-close:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    .lightbox-nav-button {
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .lightbox-nav-button:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
     /* Responsive stijlen */
     @media (max-width: 768px) {
       .container {
@@ -235,6 +359,26 @@
       .gallery-grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 20px;
+      }
+
+      .lightbox-controls {
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        bottom: auto;
+        margin-top: 20px;
+      }
+
+      .lightbox-nav-button {
+        width: 40px;
+        height: 40px;
+      }
+
+      .lightbox-close {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
       }
     }
 
@@ -269,6 +413,10 @@
 
       .gallery-grid {
         grid-template-columns: 1fr;
+      }
+
+      .lightbox-image {
+        max-height: 70vh;
       }
     }
   </style>
@@ -319,6 +467,41 @@
         <!-- Grid items worden hier dynamisch toegevoegd -->
       </div>
     </div>
+
+    <!-- NIEUW: Lightbox -->
+    <div id="lightbox" class="lightbox">
+      <button id="lightbox-close" class="lightbox-close">×</button>
+      
+      <div class="lightbox-content">
+        <img id="lightbox-image" class="lightbox-image" src="/placeholder.svg" alt="Foto in lightbox">
+        
+        <div class="lightbox-nav">
+          <button id="lightbox-prev" class="lightbox-nav-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button id="lightbox-next" class="lightbox-nav-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <div id="lightbox-caption" class="lightbox-caption"></div>
+      
+      <div class="lightbox-controls">
+        <button id="download-button" class="lightbox-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Foto
+        </button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -335,10 +518,20 @@
       const slideCounter = document.getElementById('slide-counter');
       const loadingEl = document.getElementById('loading');
       const errorEl = document.getElementById('error');
+      
+      // NIEUW: Lightbox elementen
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImage = document.getElementById('lightbox-image');
+      const lightboxCaption = document.getElementById('lightbox-caption');
+      const lightboxClose = document.getElementById('lightbox-close');
+      const lightboxPrev = document.getElementById('lightbox-prev');
+      const lightboxNext = document.getElementById('lightbox-next');
+      const downloadButton = document.getElementById('download-button');
 
-      // Variabelen voor de slider
+      // Variabelen voor de slider en lightbox
       let currentSlideIndex = 0;
       let slides = [];
+      let imageData = []; // NIEUW: Array om afbeeldingsgegevens op te slaan
 
       // Tab navigatie
       sliderTab.addEventListener('click', function() {
@@ -362,6 +555,64 @@
 
       nextButton.addEventListener('click', function() {
         changeSlide(1);
+      });
+
+      // NIEUW: Lightbox functies
+      function openLightbox(index) {
+        if (imageData.length === 0 || !imageData[index]) return;
+        
+        currentSlideIndex = index;
+        lightboxImage.src = imageData[index].url;
+        lightboxCaption.textContent = imageData[index].title;
+        lightbox.classList.add('active');
+        
+        // Voorkom scrollen van de pagina wanneer lightbox open is
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      function changeLightboxImage(direction) {
+        currentSlideIndex = (currentSlideIndex + direction + imageData.length) % imageData.length;
+        lightboxImage.src = imageData[currentSlideIndex].url;
+        lightboxCaption.textContent = imageData[currentSlideIndex].title;
+      }
+
+      // NIEUW: Download functie
+      function downloadImage() {
+        if (imageData.length === 0 || !imageData[currentSlideIndex]) return;
+        
+        const imageUrl = imageData[currentSlideIndex].url;
+        const fileName = imageData[currentSlideIndex].title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
+        
+        // Maak een tijdelijke link aan om de download te starten
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = fileName;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // NIEUW: Lightbox event listeners
+      lightboxClose.addEventListener('click', closeLightbox);
+      lightboxPrev.addEventListener('click', function() {
+        changeLightboxImage(-1);
+      });
+      lightboxNext.addEventListener('click', function() {
+        changeLightboxImage(1);
+      });
+      downloadButton.addEventListener('click', downloadImage);
+      
+      // Sluit lightbox bij klikken buiten de afbeelding
+      lightbox.addEventListener('click', function(e) {
+        if (e.target === lightbox) {
+          closeLightbox();
+        }
       });
 
       // Functie om van slide te wisselen
@@ -439,6 +690,15 @@
                 const imageUrl = row[0].trim();
                 const title = row[1].trim();
                 
+                // NIEUW: Sla afbeeldingsgegevens op
+                imageData.push({
+                  url: imageUrl,
+                  title: title,
+                  index: imageData.length
+                });
+                
+                const currentIndex = imageData.length - 1;
+                
                 // Maak een slide voor de slider
                 const slide = document.createElement('div');
                 slide.className = 'slide';
@@ -450,6 +710,11 @@
                 const caption = document.createElement('div');
                 caption.className = 'slide-caption';
                 caption.textContent = title;
+                
+                // NIEUW: Voeg klikgebeurtenis toe aan slide
+                slide.addEventListener('click', function() {
+                  openLightbox(currentIndex);
+                });
                 
                 slide.appendChild(img);
                 slide.appendChild(caption);
@@ -474,6 +739,11 @@
                 const gridCaption = document.createElement('div');
                 gridCaption.className = 'gallery-caption';
                 gridCaption.textContent = title;
+                
+                // NIEUW: Voeg klikgebeurtenis toe aan grid item
+                gridItem.addEventListener('click', function() {
+                  openLightbox(currentIndex);
+                });
                 
                 gridItem.appendChild(gridImg);
                 gridItem.appendChild(gridCaption);
@@ -508,12 +778,24 @@
       // Start het ophalen van de gegevens
       fetchData(sheetUrl);
 
-      // Toetsenbord navigatie voor de slider
+      // Toetsenbord navigatie
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowLeft') {
-          changeSlide(-1);
-        } else if (e.key === 'ArrowRight') {
-          changeSlide(1);
+        if (lightbox.classList.contains('active')) {
+          // Lightbox is open
+          if (e.key === 'ArrowLeft') {
+            changeLightboxImage(-1);
+          } else if (e.key === 'ArrowRight') {
+            changeLightboxImage(1);
+          } else if (e.key === 'Escape') {
+            closeLightbox();
+          }
+        } else {
+          // Slider navigatie
+          if (e.key === 'ArrowLeft') {
+            changeSlide(-1);
+          } else if (e.key === 'ArrowRight') {
+            changeSlide(1);
+          }
         }
       });
     });
